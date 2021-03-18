@@ -4,6 +4,8 @@ var test = require('ava')
 var servertest = require('servertest')
 
 var server = require('../lib/server')
+var redis = require('../lib/redis')
+var api = require('../lib/api')
 
 test.serial.cb('healthcheck', function (t) {
   var url = '/health'
@@ -39,6 +41,22 @@ test.serial.cb('should get all targets', function (t) {
     t.is(res.body.length, 1, 'body contains exactly one target')
     t.assert(Array.isArray(res.body), 'body is ok')
     t.end()
+  })
+})
+
+test.serial.cb('should get target by id', function (t) {
+  redis.hgetall(api.targetsKey, function (err, reply) {
+    t.falsy(err, 'no error')
+
+    var target = JSON.parse(Object.values(reply).shift())
+
+    var url = '/api/targets/' + target.id
+    servertest(server(), url, { encoding: 'json' }, function (err, res) {
+      t.falsy(err, 'no error')
+      t.is(res.statusCode, 200, 'correct statusCode')
+      t.like(res.body, testClient, 'body is ok')
+      t.end()
+    })
   })
 })
 
