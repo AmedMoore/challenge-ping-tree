@@ -60,6 +60,27 @@ test.serial.cb('should get target by id', function (t) {
   })
 })
 
+test.serial.cb('should update target by id', function (t) {
+  redis.hgetall(api.targetsKey, function (err, reply) {
+    t.falsy(err, 'no error')
+
+    var target = JSON.parse(Object.values(reply).shift())
+    var updatedTarget = Object.assign(target, { value: '12.00' })
+
+    var url = '/api/targets/' + target.id
+    var opts = { method: 'POST', encoding: 'json' }
+    servertest(server(), url, opts, onResponse)
+      .end(JSON.stringify(updatedTarget))
+
+    function onResponse (err, res) {
+      t.falsy(err, 'no error')
+      t.is(res.statusCode, 200, 'correct statusCode')
+      t.is(updatedTarget, updatedTarget, 'body is ok')
+      t.end()
+    }
+  })
+})
+
 var testClient = {
   url: 'http://example.com',
   value: '0.50',
