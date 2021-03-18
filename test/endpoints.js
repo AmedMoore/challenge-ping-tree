@@ -81,10 +81,70 @@ test.serial.cb('should update target by id', function (t) {
   })
 })
 
+test.serial.cb('should post a visitor request and get rejected', function (t) {
+  var url = '/route'
+  var opts = { method: 'POST', encoding: 'json' }
+  var visitorInfo = {
+    geoState: 'la',
+    publisher: 'abc',
+    timestamp: '2018-07-14T23:28:59.513Z'
+  }
+
+  servertest(server(), url, opts, onResponse)
+    .end(JSON.stringify(visitorInfo))
+
+  function onResponse (err, res) {
+    t.falsy(err, 'no error')
+    t.is(res.statusCode, 200, 'correct statusCode')
+    t.deepEqual(res.body, { decision: 'reject' }, 'body is ok')
+    t.end()
+  }
+})
+
+test.serial.cb('should post a visitor request and get accepted', function (t) {
+  var url = '/route'
+  var opts = { method: 'POST', encoding: 'json' }
+  var visitorInfo = {
+    geoState: 'ca',
+    publisher: 'abc',
+    timestamp: '2018-07-14T14:28:59.513Z'
+  }
+
+  servertest(server(), url, opts, onResponse)
+    .end(JSON.stringify(visitorInfo))
+
+  function onResponse (err, res) {
+    t.falsy(err, 'no error')
+    t.is(res.statusCode, 200, 'correct statusCode')
+    t.deepEqual(res.body, { url: 'http://example.com' }, 'body is ok')
+    t.end()
+  }
+})
+
+test.serial.cb('should post a visitor request and get rejected due to max accepted reach', function (t) {
+  var url = '/route'
+  var opts = { method: 'POST', encoding: 'json' }
+  var visitorInfo = {
+    geoState: 'la',
+    publisher: 'abc',
+    timestamp: '2018-07-14T23:28:59.513Z'
+  }
+
+  servertest(server(), url, opts, onResponse)
+    .end(JSON.stringify(visitorInfo))
+
+  function onResponse (err, res) {
+    t.falsy(err, 'no error')
+    t.is(res.statusCode, 200, 'correct statusCode')
+    t.deepEqual(res.body, { decision: 'reject' }, 'body is ok')
+    t.end()
+  }
+})
+
 var testClient = {
   url: 'http://example.com',
   value: '0.50',
-  maxAcceptsPerDay: '10',
+  maxAcceptsPerDay: 1,
   accept: {
     geoState: { $in: ['ca', 'ny'] },
     hour: { $in: ['13', '14', '15'] }
