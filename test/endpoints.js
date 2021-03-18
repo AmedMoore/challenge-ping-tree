@@ -31,6 +31,17 @@ test.serial.cb('should post a target', function (t) {
   }
 })
 
+test.serial.cb('should get all targets', function (t) {
+  var url = '/api/targets'
+  servertest(server(), url, { encoding: 'json' }, function (err, res) {
+    t.falsy(err, 'no error')
+    t.is(res.statusCode, 200, 'correct statusCode')
+    t.is(res.body.length, 1, 'body contains exactly one target')
+    t.assert(Array.isArray(res.body), 'body is ok')
+    t.end()
+  })
+})
+
 var testClient = {
   url: 'http://example.com',
   value: '0.50',
